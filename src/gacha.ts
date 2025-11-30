@@ -49,6 +49,10 @@ export const CHARACTER_POOL: Character[] = [
     {id: 46, name: "Anby", rarity: "A", baseClick: 2, baseCps: 1}
 ];
 
+// Pity-Counter global
+let singlePullCount = 0;
+let totalPulls = 0;
+
 // probabilities per single pull
 // S = 1%, A = 5%, B = 94%
 export function rollRarity(): Rarity {
@@ -63,34 +67,37 @@ export type PullResult =
     | { type: "CHAR"; char: Character };
 
 export function rollOne(): PullResult {
-    const rarity = rollRarity();
+    totalPulls++;
+    singlePullCount++;
+
+    let rarity: Rarity = rollRarity();
+
+    // Garantierter S-Rank bei Pull 90
+    if (totalPulls >= 90) {
+        rarity = "S";
+        singlePullCount = 0;
+        totalPulls = 0;
+    } else if (singlePullCount >= 10 && rarity === "B") {
+        // Garantierter A-Rank nach 9 B-Pulls
+        const isS = Math.random() < 0.05; // 5% Chance auf S
+        rarity = isS ? "S" : "A";
+        singlePullCount = 0;
+    }
+
     if (rarity === "B") return {type: "B"};
 
     const pool = CHARACTER_POOL.filter((c) => c.rarity === rarity);
     const char = pool[Math.floor(Math.random() * pool.length)];
-    return {type: "CHAR", char};
+    if (rarity === "A" || rarity === "S") singlePullCount = 0; // reset pity counter
+    return { type: "CHAR", char };
 }
 
-export function tenPull(): { results: PullResult[]; guaranteedAIndex?: number } {
+export function tenPull(): { results: PullResult[] } {
     const results: PullResult[] = [];
-    let gotA = false;
-
     for (let i = 0; i < 10; i++) {
-        const r = rollOne();
-        if (r.type === "CHAR" && r.char.rarity === "A") gotA = true;
-        results.push(r);
+        results.push(rollOne());
     }
-
-    let guaranteedAIndex: number | undefined = undefined;
-    if (!gotA) {
-        // force a random A into the last slot
-        const aPool = CHARACTER_POOL.filter((c) => c.rarity === "A");
-        const forced = aPool[Math.floor(Math.random() * aPool.length)];
-        results[9] = {type: "CHAR", char: forced};
-        guaranteedAIndex = 9;
-    }
-
-    return {results, guaranteedAIndex};
+    return { results };
 }
 
 // helper: apply pull results to a OwnedChar list (adds dupes as levels)

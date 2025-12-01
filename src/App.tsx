@@ -11,7 +11,7 @@ import PullResults from "./components/PullResults";
 import "./styles/app.css";
 
 const ONE_PULL_COST = 160; // 1x 160
-const TEN_PULL_COST = 0; // 10x 160
+const TEN_PULL_COST = ONE_PULL_COST*10; // 10x 160
 
 export default function App(): JSX.Element {
     const [poly, setPoly] = useState<number>(0);

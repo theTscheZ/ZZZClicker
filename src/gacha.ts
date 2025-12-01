@@ -18,7 +18,7 @@ export const CHARACTER_POOL: Character[] = [
     {id: 15, name: "Hugo", rarity: "S", baseClick: 4, baseCps: 2},
     {id: 16, name: "Vivian", rarity: "S", baseClick: 6, baseCps: 3.5},
     {id: 17, name: "Trigger", rarity: "S", baseClick: 5, baseCps: 3},
-    {id: 18, name: "Soldier 0 Anby", rarity: "A", baseClick: 2, baseCps: 1.1},
+    {id: 18, name: "Soldier 0 Anby", rarity: "S", baseClick: 2, baseCps: 1.1},
     {id: 19, name: "Pulchra", rarity: "A", baseClick: 3, baseCps: 1.3},
     {id: 20, name: "Evelyn", rarity: "S", baseClick: 6, baseCps: 4},
     {id: 21, name: "Astra", rarity: "S", baseClick: 6, baseCps: 3.5},
@@ -34,11 +34,11 @@ export const CHARACTER_POOL: Character[] = [
     {id: 31, name: "Zhu Yuan", rarity: "S", baseClick: 4, baseCps: 2.5},
     {id: 32, name: "Ellen", rarity: "S", baseClick: 5, baseCps: 3},
     {id: 33, name: "Grace", rarity: "S", baseClick: 6, baseCps: 3.5},
-    {id: 34, name: "Soldier 11", rarity: "A", baseClick: 3, baseCps: 1.4},
+    {id: 34, name: "Soldier 11", rarity: "S", baseClick: 3, baseCps: 1.4},
     {id: 35, name: "Nekomata", rarity: "S", baseClick: 5, baseCps: 3},
     {id: 36, name: "Lycaon", rarity: "S", baseClick: 6, baseCps: 4},
-    {id: 37, name: "Koleda", rarity: "A", baseClick: 2, baseCps: 1.2},
-    {id: 38, name: "Rina", rarity: "A", baseClick: 3, baseCps: 1.3},
+    {id: 37, name: "Koleda", rarity: "S", baseClick: 2, baseCps: 1.2},
+    {id: 38, name: "Rina", rarity: "S", baseClick: 3, baseCps: 1.3},
     {id: 39, name: "Piper", rarity: "A", baseClick: 2, baseCps: 1},
     {id: 40, name: "Lucy", rarity: "A", baseClick: 3, baseCps: 1.2},
     {id: 41, name: "Corin", rarity: "A", baseClick: 3, baseCps: 1.5},
@@ -46,7 +46,8 @@ export const CHARACTER_POOL: Character[] = [
     {id: 43, name: "Ben", rarity: "A", baseClick: 2, baseCps: 1},
     {id: 44, name: "Soukaku", rarity: "A", baseClick: 2, baseCps: 1.3},
     {id: 45, name: "Nicole", rarity: "A", baseClick: 2, baseCps: 1.2},
-    {id: 46, name: "Anby", rarity: "A", baseClick: 2, baseCps: 1}
+    {id: 46, name: "Anby", rarity: "A", baseClick: 2, baseCps: 1},
+    {id: 47, name: "Billy", rarity: "A", baseClick: 1, baseCps: 1.6},
 ];
 
 // Pity-Counter global

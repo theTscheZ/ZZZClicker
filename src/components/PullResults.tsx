@@ -9,7 +9,7 @@ export default function PullResults({ results }: Props) {
         <div className="pull-results">
             {results.map((r, i) => (
                 <div key={i} className="pull-item">
-                    {r.type === "B" ? "B (Refund)" : `${r.char.name} (${r.char.rarity})`}
+                    {r.type === "B" ? "Polychrome*20 (B)" : `${r.char.name} (${r.char.rarity})`}
                 </div>
             ))}
         </div>

@@ -9,5 +9,4 @@ header h1 { margin: 0 0 16px 0; }
 .char-card { background:#0f1724; padding:8px; border-radius:8px; width:180px; }
 .rarity-S { color: gold; }
 .rarity-A { color: deepskyblue; }
-.team-slot { margin-top:8px; padding:8px; background:#071021; border-radius:8px; }
-.equip-list button { margin-right:6px; margin-top:6px; }
+.team-slot { margin-top:8px; padding:8px; background:#071021; border-radius:8px; width:220px;}

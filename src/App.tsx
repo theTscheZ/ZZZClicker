@@ -11,7 +11,7 @@ import PullResults from "./components/PullResults";
 import "./styles/app.css";
 
 const ONE_PULL_COST = 160; // 1x 160
-const TEN_PULL_COST = 1600; // 10x 160
+const TEN_PULL_COST = 0; // 10x 160
 
 export default function App(): JSX.Element {
     const [poly, setPoly] = useState<number>(0);
@@ -75,14 +75,6 @@ export default function App(): JSX.Element {
         setPulling(false);
     }
 
-    function equipToSlot(slot: number, oc: OwnedChar) {
-        setTeam((t) => {
-            const copy = [...t];
-            copy[slot] = oc;
-            return copy;
-        });
-    }
-
     return (
         <div className="app-root">
             <header>
@@ -126,14 +118,36 @@ export default function App(): JSX.Element {
                 <h2>Team (3 Slots)</h2>
                 {team.map((slot, idx) => (
                     <div key={idx} className="team-slot">
-                        <div>Slot {idx + 1}: {slot ? `${slot.char.name} (Lv ${slot.level})` : "— leer —"}</div>
-                        <div className="equip-list">
-                            {owned.map((o) => (
-                                <button key={o.char.id} onClick={() => equipToSlot(idx, o)}>
-                                    Equip {o.char.name}
-                                </button>
-                            ))}
-                        </div>
+                        <div>Slot {idx + 1}: {slot ? `${slot.char.name} (Lv ${slot.level})` : "-- leer --"}</div>
+
+                        <select
+                            value={slot?.char.id ?? ""}
+                            onChange={(e) => {
+                                const charId = parseInt(e.target.value);
+                                const selectedChar = owned.find(o => o.char.id === charId);
+                                if (!selectedChar) return;
+
+                                // Check ob char schon in einem anderen Slot ist
+                                const isAlreadyEquipped = team.some((t, i) => t?.char.id === charId && i !== idx);
+                                if (isAlreadyEquipped) return; // ignorieren, wenn schon ausgerüstet
+
+                                setTeam(t => {
+                                    const copy = [...t];
+                                    copy[idx] = selectedChar;
+                                    return copy;
+                                });
+                            }}
+                        >
+                            <option value="">-- leer --</option>
+                            {owned.map(o => {
+                                const isEquipped = team.some((t, i) => t?.char.id === o.char.id && i !== idx);
+                                return (
+                                    <option key={o.char.id} value={o.char.id} disabled={isEquipped}>
+                                        {o.char.name} (Lv {o.level})
+                                    </option>
+                                );
+                            })}
+                        </select>
                     </div>
                 ))}
             </section>

@@ -1,0 +1,12 @@
+.character-card { background:#0f1724; padding:8px; border-radius:8px; width:180px; }
+.rarity-S { color: #f28b00; }
+.rarity-A { color: #ab00f3; }
+.faction-name {
+    margin-top: 10px;
+    font-weight: bold;
+    text-decoration: underline;
+}
+.faction-bonus {
+    margin-top: 2px;
+    font-size: 0.85em;
+}

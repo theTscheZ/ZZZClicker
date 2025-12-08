@@ -40,3 +40,37 @@
 .read-the-docs {
   color: #888;
 }
+
+/* new stuff */
+
+/* Character Card layout */
+.character-card {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.5rem 0.75rem;
+}
+
+/* Icon Settings */
+.character-icon {
+    width: 40px;
+    height: 40px;
+    object-fit: contain;
+    border-radius: 8px;
+}
+
+/* Text Layout */
+.character-info {
+    text-align: left;
+}
+
+.character-name {
+    font-weight: 600;
+}
+
+.character-level {
+    font-size: 0.85rem;
+    opacity: 0.8;
+}
+
+

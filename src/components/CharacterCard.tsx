@@ -5,8 +5,8 @@ type Props = {
     onEquip?: () => void;
 };
 
-export default function CharacterCard({ owned, onEquip }: Props) {
-    const { char, level } = owned;
+export default function CharacterCard({owned, onEquip}: Props) {
+    const {char, level} = owned;
     const clickBonus = (char.baseClick * level).toFixed(0);
     const cpsBonus = (char.baseCps * level).toFixed(1);
 
@@ -16,6 +16,7 @@ export default function CharacterCard({ owned, onEquip }: Props) {
             <div>Level: {level}</div>
             <div>+{clickBonus} per click</div>
             <div>+{cpsBonus} CPS</div>
+            <div>{char.faction}</div>
             {onEquip && <button onClick={onEquip}>Equip</button>}
         </div>
     );

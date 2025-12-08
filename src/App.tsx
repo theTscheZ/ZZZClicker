@@ -8,10 +8,11 @@ import {
 import type {OwnedChar} from "./types";
 import CharacterCard from "./components/CharacterCard";
 import PullResults from "./components/PullResults";
+import {calculateTeamBonus} from "./logic/teamBonuses";
 import "./styles/app.css";
 
 const ONE_PULL_COST = 160; // 1x 160
-const TEN_PULL_COST = ONE_PULL_COST*10; // 10x 160
+const TEN_PULL_COST = ONE_PULL_COST * 0; // 10x 160
 
 export default function App(): JSX.Element {
     const [poly, setPoly] = useState<number>(0);
@@ -22,11 +23,16 @@ export default function App(): JSX.Element {
     const [lastResults, setLastResults] = useState<PullResult[]>([]);
 
     // calculate click value and cps
-    const clickValue =
+    const baseClick =
         1 +
         team.reduce((acc, t) => acc + (t ? t.char.baseClick * t.level : 0), 0);
 
-    const cps = team.reduce((acc, t) => acc + (t ? t.char.baseCps * t.level : 0), 0);
+    const baseCps = team.reduce((acc, t) => acc + (t ? t.char.baseCps * t.level : 0), 0);
+    const {bonusClick, bonusCps} = calculateTeamBonus(team);
+
+    const clickValue = Number((baseClick * (1 + bonusClick)).toFixed(2));
+    const cps = Number((baseCps * (1 + bonusCps)).toFixed(2));
+
 
     useEffect(() => {
         if (cps <= 0) return;
@@ -49,7 +55,7 @@ export default function App(): JSX.Element {
         await new Promise((res) => setTimeout(res, 700));
 
         const result = rollOne();
-        const { owned: newOwned, polyGainedFromB } = applyPullsToOwned(owned, [result]);
+        const {owned: newOwned, polyGainedFromB} = applyPullsToOwned(owned, [result]);
 
         setOwned(newOwned);
         setPoly((p) => p + polyGainedFromB);
@@ -66,8 +72,8 @@ export default function App(): JSX.Element {
         // simple animation delay
         await new Promise((res) => setTimeout(res, 700));
 
-        const { results } = tenPull();
-        const { owned: newOwned, polyGainedFromB } = applyPullsToOwned(owned, results);
+        const {results} = tenPull();
+        const {owned: newOwned, polyGainedFromB} = applyPullsToOwned(owned, results);
 
         setOwned(newOwned);
         setPoly((p) => p + polyGainedFromB);
@@ -101,7 +107,7 @@ export default function App(): JSX.Element {
                     {pulling ? "Pulling..." : `10-Pull (${TEN_PULL_COST})`}
                 </button>
 
-                <PullResults results={lastResults} />
+                <PullResults results={lastResults}/>
             </section>
 
             <section className="owned">
@@ -109,13 +115,13 @@ export default function App(): JSX.Element {
                 {owned.length === 0 && <div>Noch keine Charaktere</div>}
                 <div className="owned-list">
                     {owned.map((o) => (
-                        <CharacterCard key={o.char.id} owned={o} onEquip={undefined} />
+                        <CharacterCard key={o.char.id} owned={o} onEquip={undefined}/>
                     ))}
                 </div>
             </section>
 
             <section className="team">
-                <h2>Team (3 Slots)</h2>
+                <h2>Team</h2>
                 {team.map((slot, idx) => (
                     <div key={idx} className="team-slot">
                         <div>Slot {idx + 1}: {slot ? `${slot.char.name} (Lv ${slot.level})` : "-- leer --"}</div>

@@ -1,9 +1,9 @@
 import { factionBonuses, type Faction, type FactionBonusDef } from "./factions";
-import type {OwnedChar} from "../types.ts";
+import type {OwnedChar} from "../types/types.ts";
 
 export function calculateTeamBonus(team: (OwnedChar | null)[]) {
     const equipped = team.filter(Boolean) as OwnedChar[];
-    if (equipped.length < 2) return { bonusClick: 0, bonusCps: 0 };
+    if (equipped.length < 2) return { bonusClick: 0, bonusCps: 0, activeFactions: [] };
 
     const factionCount: Record<string, number> = {};
     for (const e of equipped) {
@@ -13,6 +13,7 @@ export function calculateTeamBonus(team: (OwnedChar | null)[]) {
 
     let bonusClick = 0;
     let bonusCps = 0;
+    const activeFactions: string[] = [];
 
     for (const [faction, count] of Object.entries(factionCount)) {
         // narrow the key for TypeScript safety
@@ -24,11 +25,13 @@ export function calculateTeamBonus(team: (OwnedChar | null)[]) {
         if (count >= 3 && bonusDef.three) {
             bonusClick += bonusDef.three.click;
             bonusCps += bonusDef.three.cps;
+            activeFactions.push(`${faction}-3`);
         } else if (count === 2 && bonusDef.two) {
             bonusClick += bonusDef.two.click;
             bonusCps += bonusDef.two.cps;
+            activeFactions.push(`${faction}-2`);
         }
     }
 
-    return { bonusClick, bonusCps };
+    return { bonusClick, bonusCps, activeFactions };
 }

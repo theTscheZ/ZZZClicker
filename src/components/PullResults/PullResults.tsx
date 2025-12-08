@@ -1,4 +1,4 @@
-import type {PullResult} from "../gacha";
+import type {PullResult} from "../../logic/gacha.ts";
 
 type Props = {
     results: PullResult[];

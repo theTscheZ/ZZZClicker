@@ -1,4 +1,4 @@
-import type {Character, OwnedChar, Rarity} from "./types";
+import type {Character, OwnedChar, Rarity} from "../types/types.ts";
 
 export const CHARACTER_POOL: Character[] = [
     {id: 1, name: "Ye Shunguang", rarity: "S", baseClick: 5, baseCps: 2.5, faction: "Yunkui Summit"},

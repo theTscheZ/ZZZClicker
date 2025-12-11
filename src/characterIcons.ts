@@ -28,6 +28,23 @@ import CaesarIcon from "./images/Caesar_Icon.png";
 import JaneIcon from "./images/Jane_Icon.png";
 import SethIcon from "./images/Seth_Icon.png";
 import QingyiIcon from "./images/Qingyi_Icon.png";
+import ZhuYuanIcon from "./images/Zhu_Yuan_Icon.png";
+import EllenIcon from "./images/Ellen_Icon.png";
+import GraceIcon from "./images/Grace_Icon.png";
+import Soldier11Icon from "./images/Soldier_11_Icon.png";
+import NekomataIcon from "./images/Nekomata_Icon.png";
+import LycaonIcon from "./images/Lycaon_Icon.png";
+import KoledaIcon from "./images/Koleda_Icon.png";
+import RinaIcon from "./images/Rina_Icon.png";
+import PiperIcon from "./images/Piper_Icon.png";
+import LucyIcon from "./images/Lucy_Icon.png";
+import CorinIcon from "./images/Corin_Icon.png";
+import AntonIcon from "./images/Anton_Icon.png";
+import BenIcon from "./images/Ben_Icon.png";
+import SoukakuIcon from "./images/Soukaku_Icon.png";
+import NicoleIcon from "./images/Nicole_Icon.png";
+import AnbyIcon from "./images/Anby_Icon.png";
+import BillyIcon from "./images/Billy_Icon.png";
 
 // Map character IDs to their icon image
 export const characterIcons: Record<number, string> = {
@@ -61,5 +78,22 @@ export const characterIcons: Record<number, string> = {
     28: JaneIcon,
     29: SethIcon,
     30: QingyiIcon,
-    // X: newIcon
+    31: ZhuYuanIcon,
+    32: EllenIcon,
+    33: GraceIcon,
+    34: Soldier11Icon,
+    35: NekomataIcon,
+    36: LycaonIcon,
+    37: KoledaIcon,
+    38: RinaIcon,
+    39: PiperIcon,
+    40: LucyIcon,
+    41: CorinIcon,
+    42: AntonIcon,
+    43: BenIcon,
+    44: SoukakuIcon,
+    45: NicoleIcon,
+    46: AnbyIcon,
+    47: BillyIcon,
+
 };

@@ -1,2 +1,5 @@
 .pull-results { margin-top:8px; display:flex; gap:8px; flex-wrap:wrap; }
 .pull-item { padding:6px 8px; background:#16202b; border-radius:6px; }
+.rarity-B {
+    color: #4da3ff; /* blau */
+}

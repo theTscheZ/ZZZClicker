@@ -35,6 +35,8 @@ export default function App(): JSX.Element {
         AchievementId[]
     >([]);
 
+    const [totalPulls, setTotalPulls] = useState<number>(0);
+
     const toggleMenu = () => setMenuOpen((m) => !m);
 
     const openCollection = () => {
@@ -69,6 +71,20 @@ export default function App(): JSX.Element {
         return () => clearInterval(i);
     }, [cps]);
 
+    useEffect(() => {
+        if (cps < 10) return;
+        if (unlockedAchievements.includes("afk_cps_10")) return;
+
+        const t = setTimeout(() => {
+            setUnlockedAchievements((prev) => {
+                if (prev.includes("afk_cps_10")) return prev;
+                return [...prev, "afk_cps_10"];
+            });
+        }, 0);
+
+        return () => clearTimeout(t);
+    }, [cps, unlockedAchievements]);
+
     function handleClick() {
         setPoly((p) => p + clickValue);
     }
@@ -80,7 +96,6 @@ export default function App(): JSX.Element {
         setPulling(true);
         setLastResults([]);
 
-        // simple animation delay
         await new Promise((res) => setTimeout(res, 700));
 
         const result = rollOne();
@@ -92,7 +107,8 @@ export default function App(): JSX.Element {
         setLastResults([result]);
         setPulling(false);
 
-        updateAchievements(prevOwnedCount, newOwned.length);
+        setTotalPulls((p) => p + 1);
+        updateAchievements(prevOwnedCount, newOwned.length, totalPulls + 1);
     }
 
     async function handleTenPull() {
@@ -101,10 +117,21 @@ export default function App(): JSX.Element {
         setPulling(true);
         setLastResults([]);
 
-        // simple animation delay
         await new Promise((res) => setTimeout(res, 700));
 
         const { results } = tenPull();
+
+        const sCount = results.filter(
+            (r) => r.type === "CHAR" && r.char.rarity === "S"
+        ).length;
+
+        if (sCount >= 2) {
+            setUnlockedAchievements((prev) => {
+                if (prev.includes("lucky_day")) return prev;
+                return [...prev, "lucky_day"];
+            });
+        }
+
         const prevOwnedCount = owned.length;
         const { owned: newOwned, polyGainedFromB } = applyPullsToOwned(owned, results);
 
@@ -113,18 +140,18 @@ export default function App(): JSX.Element {
         setLastResults(results);
         setPulling(false);
 
-        updateAchievements(prevOwnedCount, newOwned.length);
+        setTotalPulls((p) => p + 10);
+        updateAchievements(prevOwnedCount, newOwned.length, totalPulls + 10);
     }
 
     async function handleStarterBannerPull() {
-        // already used, not enough poly, or currently pulling -> do nothing
         if (starterUsed || poly < STARTER_PULL_COST || pulling) return;
 
         setPoly((p) => p - STARTER_PULL_COST);
         setPulling(true);
         setLastResults([]);
 
-        // simple animation delay
+
         await new Promise((res) => setTimeout(res, 700));
 
         const { results } = StarterBanner.tenPull();
@@ -137,30 +164,42 @@ export default function App(): JSX.Element {
         setPulling(false);
         setStarterUsed(true); // lock banner after first use
 
-        updateAchievements(prevOwnedCount, newOwned.length);
+        setTotalPulls((p) => p + 10);
+        updateAchievements(prevOwnedCount, newOwned.length, totalPulls + 10);
 
     }
 
-    function updateAchievements(prevOwnedCount: number, newOwnedCount: number) {
+    function updateAchievements(
+        prevOwnedCount: number,
+        newOwnedCount: number,
+        newTotalPulls: number
+    ) {
         setUnlockedAchievements((prev) => {
             const set = new Set(prev);
             let changed = false;
 
-            // "Let There Be Life" – first character acquired
-            if (
-                prevOwnedCount === 0 &&
-                newOwnedCount > 0 &&
-                !set.has("first_character")
-            ) {
+            // First character
+            if (prevOwnedCount === 0 && newOwnedCount > 0 && !set.has("first_character")) {
                 set.add("first_character");
                 changed = true;
             }
 
-            return changed ? Array.from(set) as AchievementId[] : prev;
+            // Pull 300 times
+            if (newTotalPulls >= 300 && !set.has("pull_100")) {
+                set.add("pull_100");
+                changed = true;
+            }
+
+            // Character Collector (20+ unique owned)
+            if (newOwnedCount >= 20 && !set.has("character_collector")) {
+                set.add("character_collector");
+                changed = true;
+            }
+
+            return changed ? (Array.from(set) as AchievementId[]) : prev;
         });
     }
-
-
+    
     return (
 
         <div className="app-root">
@@ -227,7 +266,7 @@ export default function App(): JSX.Element {
 
             <section className="owned">
                 <h2>Owned Characters</h2>
-                {owned.length === 0 && <div>Noch keine Charaktere</div>}
+                {owned.length === 0 && <div>No characters.</div>}
                 <div className="owned-list">
                     {owned.map((o) => (
                         <CharacterCard key={o.char.id} owned={o} onEquip={undefined} />
@@ -248,9 +287,9 @@ export default function App(): JSX.Element {
                                 const selectedChar = owned.find(o => o.char.id === charId);
                                 if (!selectedChar) return;
 
-                                // Check ob char schon in einem anderen Slot ist
+
                                 const isAlreadyEquipped = team.some((t, i) => t?.char.id === charId && i !== idx);
-                                if (isAlreadyEquipped) return; // ignorieren, wenn schon ausgerüstet
+                                if (isAlreadyEquipped) return;
 
                                 setTeam(t => {
                                     const copy = [...t];

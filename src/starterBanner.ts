@@ -2,7 +2,7 @@ import { CHARACTER_POOL, rollRarity, type PullResult } from "./logic/gacha.ts";
 import type { Rarity } from "./types/types.ts";
 
 export class StarterBanner {
-    tenPull(): { results: PullResult[] } {
+    static tenPull(): { results: PullResult[] } {
         const results: PullResult[] = [];
 
         // guaranteed S-Rank (only one)

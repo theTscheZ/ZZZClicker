@@ -10,14 +10,26 @@ import CharacterCard from "./components/CharacterCard/CharacterCard.tsx";
 import PullResults from "./components/PullResults/PullResults.tsx";
 import {calculateTeamBonus} from "./logic/teamBonuses";
 import "./styles/app.css";
+import {loadState, saveState} from "./utils/storage.ts";
 
 const ONE_PULL_COST = 160; // 1x 160
 const TEN_PULL_COST = ONE_PULL_COST * 10; // 10x 160
 
 export default function App(): JSX.Element {
-    const [poly, setPoly] = useState<number>(0);
-    const [owned, setOwned] = useState<OwnedChar[]>([]);
-    const [team, setTeam] = useState<(OwnedChar | null)[]>([null, null, null]);
+    const loaded = loadState();
+
+    const [poly, setPoly] = useState<number>(loaded?.poly ?? 0);
+    const [owned, setOwned] = useState<OwnedChar[]>(loaded?.owned ?? []);
+    const [team, setTeam] = useState<(OwnedChar | null)[]>(
+        loaded?.team ?? [null, null, null]);
+
+    useEffect(() => {
+        saveState({
+            poly,
+            owned,
+            team,
+        });
+    }, [poly, owned, team]);
 
     const [pulling, setPulling] = useState(false);
     const [lastResults, setLastResults] = useState<PullResult[]>([]);

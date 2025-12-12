@@ -4,6 +4,12 @@
 
 A small React + TypeScript clicker game with a simple gacha system. You generate currency, perform pulls, collect characters, and build a team with faction bonuses.
 
+## Team members
+
+* Niklas Mikeska
+* Aaron Bandion
+* Rafael Bieringer
+
 ## Requirements
 
 * Node.js

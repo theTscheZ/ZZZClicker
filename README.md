@@ -53,7 +53,7 @@ npm run preview
 
 The game automatically saves the following data to ensure your progress is preserved across sessions:
 
-* olychromes (poly): The amount of in-game currency you have collected.
+* polychromes (poly): The amount of in-game currency you have collected.
 * Owned Characters (owned): The list of characters you have acquired, along with their levels.
 * Team (team): The characters currently equipped in your team, including their levels.
 * Achievements (unlockedAchievements): The achievements you have unlocked during gameplay.

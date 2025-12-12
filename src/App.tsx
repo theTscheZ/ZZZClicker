@@ -18,7 +18,7 @@ import {loadState, saveState, clearState} from "./utils/storage.ts";
 import ZZZLogo from "./images/ZZZ_Logo.png"
 
 const ONE_PULL_COST = 160; // 1x 160
-const TEN_PULL_COST = ONE_PULL_COST * 10; // 10x 160
+const TEN_PULL_COST = ONE_PULL_COST * 0; // 10x 160
 const STARTER_PULL_COST = 20;
 
 export default function App(): JSX.Element {
@@ -241,17 +241,17 @@ export default function App(): JSX.Element {
                 </button>
 
                 <section className="gacha">
-                    <h2>Starter-Pull (One-Time)</h2>
-                    <button
-                        onClick={handleStarterBannerPull}
-                        disabled={starterUsed || poly < STARTER_PULL_COST || pulling}
-                    >
-                        {starterUsed
-                            ? "Starter Banner Used"
-                            : pulling
-                                ? "Pulling..."
-                                : `Starter 10-Pull (${STARTER_PULL_COST})`}
-                    </button>
+                    {!starterUsed && (
+                        <div>
+                            <h2>Starter-Pull (One-Time)</h2>
+                            <button
+                                onClick={handleStarterBannerPull}
+                                disabled={poly < STARTER_PULL_COST || pulling}
+                            >
+                                {pulling ? "Pulling..." : `Starter 10-Pull (${STARTER_PULL_COST})`}
+                            </button>
+                        </div>
+                    )}
 
                     <h2>1-Pull</h2>
                     <button onClick={handleOnePull} disabled={poly < ONE_PULL_COST || pulling}>

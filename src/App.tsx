@@ -199,7 +199,7 @@ export default function App(): JSX.Element {
             return changed ? (Array.from(set) as AchievementId[]) : prev;
         });
     }
-    
+
     return (
 
         <div className="app-root">

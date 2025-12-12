@@ -15,6 +15,7 @@ import {type AchievementId} from "./logic/achievements.ts";
 import AchievementsModal from "./components/AchievementsModal";
 import {calculateTeamBonus} from "./logic/teamBonuses";
 import {loadState, saveState, clearState} from "./utils/storage.ts";
+import ZZZLogo from "./images/ZZZ_Logo.png"
 
 const ONE_PULL_COST = 160; // 1x 160
 const TEN_PULL_COST = ONE_PULL_COST * 10; // 10x 160
@@ -202,8 +203,11 @@ export default function App(): JSX.Element {
     return (
 
         <div className="app-root">
-            <header>
-                <h1>ZZZ Clicker</h1>
+            <header className="site-header">
+                <div className="site-title">
+                    <img className="site-logo" src={ZZZLogo} alt="ZZZ Logo" />
+                    <h1>Clicker</h1>
+                </div>
             </header>
 
             <div className="app">

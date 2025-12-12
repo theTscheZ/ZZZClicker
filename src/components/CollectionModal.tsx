@@ -1,7 +1,7 @@
 import type { FC } from "react";
-import type { OwnedChar } from "../types.ts";
-import { CHARACTER_POOL } from "../gacha.ts";
-import { characterIcons } from "../characterIcons.ts";
+import type { OwnedChar } from "../types/types.ts";
+import { CHARACTER_POOL } from "../logic/gacha.ts";
+import { characterIcons } from "../logic/characterIcons.ts";
 
 type Props = {
     owned: OwnedChar[];

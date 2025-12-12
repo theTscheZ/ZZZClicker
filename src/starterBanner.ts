@@ -1,18 +1,14 @@
-import { CHARACTER_POOL, rollRarity, type PullResult } from "./gacha";
-import type { Rarity } from "./types";
+import { CHARACTER_POOL, rollRarity, type PullResult } from "./logic/gacha.ts";
+import type { Rarity } from "./types/types.ts";
 
 export class StarterBanner {
-    /**
-     * 10-pull that guarantees one random S-rank character.
-     * Other 9 pulls are A/B only (no extra S).
-     */
-    static tenPull(): { results: PullResult[] } {
+    tenPull(): { results: PullResult[] } {
         const results: PullResult[] = [];
 
         // guaranteed S-Rank (only one)
         const sPool = CHARACTER_POOL.filter((c) => c.rarity === "S");
         if (sPool.length === 0) {
-            // Fallback: no S chars defined; return empty for now
+
             return { results: [] };
         }
 
@@ -23,7 +19,7 @@ export class StarterBanner {
         for (let i = 0; i < 9; i++) {
             let rarity: Rarity;
 
-            // use same rarity RNG, but reject S-Ranks
+
             do {
                 rarity = rollRarity();
             } while (rarity === "S");
@@ -37,7 +33,7 @@ export class StarterBanner {
             }
         }
 
-        // 3) shuffle so the S-rank isn't always first
+        // shuffle so the S-rank isn't always first
         for (let i = results.length - 1; i > 0; i--) {
             const j = Math.floor(Math.random() * (i + 1));
             [results[i], results[j]] = [results[j], results[i]];

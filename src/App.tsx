@@ -4,10 +4,10 @@ import {
     rollOne,
     applyPullsToOwned,
     type PullResult,
-} from "./gacha";
-import type {OwnedChar} from "./types";
-import CharacterCard from "./components/CharacterCard";
-import PullResults from "./components/PullResults";
+} from "./logic/gacha.ts";
+import type {OwnedChar} from "./types/types.ts";
+import CharacterCard from "./components/CharacterCard/CharacterCard.tsx";
+import PullResults from "./components/PullResults/PullResults.tsx";
 import "./styles/app.css";
 import { StarterBanner } from "./starterBanner.ts"
 import CollectionModal from "./components/CollectionModal";

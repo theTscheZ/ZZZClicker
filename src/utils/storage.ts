@@ -1,9 +1,13 @@
 import type { OwnedChar } from "../types/types.ts";
+import type { AchievementId } from "../logic/achievements.ts";
 
 export type SaveData = {
     poly: number;
     owned: OwnedChar[];
     team: (OwnedChar | null)[];
+    achievements: AchievementId[];
+    starterUsed: boolean;
+    totalPulls: number;
 };
 
 const STORAGE_KEY = "zzzSave";
@@ -21,4 +25,8 @@ export function loadState(): SaveData | null {
         console.error("Save corrupted");
         return null;
     }
+}
+
+export function clearState() {
+    localStorage.removeItem(STORAGE_KEY);
 }

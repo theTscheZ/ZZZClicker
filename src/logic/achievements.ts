@@ -1,11 +1,4 @@
-
-export type AchievementId =
-    | "first_character"
-    | "pull_100"
-    | "afk_cps_10"
-    | "lucky_day"
-    | "character_collector";
-
+export type AchievementId = typeof ACHIEVEMENTS[number]["id"];
 
 export const ACHIEVEMENTS = [
     {

@@ -1,5 +1,5 @@
-import { CHARACTER_POOL, rollRarity, type PullResult } from "./logic/gacha.ts";
-import type { Rarity } from "./types/types.ts";
+import { CHARACTER_POOL, rollRarity, type PullResult } from "./gacha.ts";
+import type { Rarity } from "../types/types.ts";
 
 export class StarterBanner {
     static tenPull(): { results: PullResult[] } {

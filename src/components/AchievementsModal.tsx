@@ -1,5 +1,5 @@
 import type { FC } from "react";
-import { ACHIEVEMENTS, type AchievementId } from "../achievements";
+import { ACHIEVEMENTS, type AchievementId } from "../logic/achievements.ts";
 
 type Props = {
     unlocked: AchievementId[];

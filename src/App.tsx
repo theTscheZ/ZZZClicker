@@ -9,33 +9,57 @@ import type {OwnedChar} from "./types/types.ts";
 import CharacterCard from "./components/CharacterCard/CharacterCard.tsx";
 import PullResults from "./components/PullResults/PullResults.tsx";
 import "./styles/app.css";
-import { StarterBanner } from "./starterBanner.ts"
+import {StarterBanner} from "./logic/starterBanner.ts"
 import CollectionModal from "./components/CollectionModal";
-import { ACHIEVEMENTS, type AchievementId } from "./achievements";
+import {type AchievementId} from "./logic/achievements.ts";
 import AchievementsModal from "./components/AchievementsModal";
+import {calculateTeamBonus} from "./logic/teamBonuses";
+import {loadState, saveState, clearState} from "./utils/storage.ts";
 
 const ONE_PULL_COST = 160; // 1x 160
-const TEN_PULL_COST = ONE_PULL_COST*10; // 10x 160
+const TEN_PULL_COST = ONE_PULL_COST * 10; // 10x 160
 const STARTER_PULL_COST = 20;
 
 export default function App(): JSX.Element {
-    const [poly, setPoly] = useState<number>(0);
-    const [owned, setOwned] = useState<OwnedChar[]>([]);
-    const [team, setTeam] = useState<(OwnedChar | null)[]>([null, null, null]);
+    // clearState();
+    const loaded = loadState();
 
-    const [pulling, setPulling] = useState(false);
-    const [lastResults, setLastResults] = useState<PullResult[]>([]);
-    const [starterUsed, setStarterUsed] = useState<boolean>(false);
+    const [poly, setPoly] = useState<number>(loaded?.poly ?? 0);
+    const [owned, setOwned] = useState<OwnedChar[]>(loaded?.owned ?? []);
+    const [team, setTeam] = useState<(OwnedChar | null)[]>(loaded?.team ?? [null, null, null]);
+
+    const [starterUsed, setStarterUsed] = useState<boolean>(loaded?.starterUsed ?? false);
 
     const [menuOpen, setMenuOpen] = useState(false);
     const [showCollection, setShowCollection] = useState(false);
-
     const [showAchievements, setShowAchievements] = useState(false);
-    const [unlockedAchievements, setUnlockedAchievements] = useState<
-        AchievementId[]
-    >([]);
 
-    const [totalPulls, setTotalPulls] = useState<number>(0);
+    const [unlockedAchievements, setUnlockedAchievements] = useState<AchievementId[]>(
+        loaded?.achievements ?? []
+    );
+
+    const [totalPulls, setTotalPulls] = useState<number>(loaded?.totalPulls ?? 0);
+
+    const [pulling, setPulling] = useState(false);
+    const [lastResults, setLastResults] = useState<PullResult[]>([]);
+
+    useEffect(() => {
+        saveState({
+            poly,
+            owned,
+            team,
+            achievements: unlockedAchievements,
+            starterUsed,
+            totalPulls,
+        });
+    }, [poly, owned, team, unlockedAchievements, starterUsed, totalPulls]);
+
+    function checkAndUnlock(id: AchievementId, condition: boolean) {
+        if (!condition) return;
+        setUnlockedAchievements(prev =>
+            prev.includes(id) ? prev : [...prev, id]
+        );
+    }
 
     const toggleMenu = () => setMenuOpen((m) => !m);
 
@@ -59,11 +83,15 @@ export default function App(): JSX.Element {
     };
 
     // calculate click value and cps
-    const clickValue =
+    const baseClick =
         1 +
         team.reduce((acc, t) => acc + (t ? t.char.baseClick * t.level : 0), 0);
 
-    const cps = team.reduce((acc, t) => acc + (t ? t.char.baseCps * t.level : 0), 0);
+    const baseCps = team.reduce((acc, t) => acc + (t ? t.char.baseCps * t.level : 0), 0);
+    const {bonusClick, bonusCps, activeFactions} = calculateTeamBonus(team);
+
+    const clickValue = Number((baseClick * (1 + bonusClick)).toFixed(2));
+    const cps = Number((baseCps * (1 + bonusCps)).toFixed(2));
 
     useEffect(() => {
         if (cps <= 0) return;
@@ -71,19 +99,37 @@ export default function App(): JSX.Element {
         return () => clearInterval(i);
     }, [cps]);
 
+    // Achievement: AFK Strategy (CPS 10+)
     useEffect(() => {
-        if (cps < 10) return;
-        if (unlockedAchievements.includes("afk_cps_10")) return;
-
         const t = setTimeout(() => {
-            setUnlockedAchievements((prev) => {
-                if (prev.includes("afk_cps_10")) return prev;
-                return [...prev, "afk_cps_10"];
-            });
+            checkAndUnlock("afk_cps_10", cps >= 10);
         }, 0);
-
         return () => clearTimeout(t);
-    }, [cps, unlockedAchievements]);
+    }, [cps]);
+
+    // Achievement: First Character
+    useEffect(() => {
+        const t = setTimeout(() => {
+            checkAndUnlock("first_character", owned.length > 0);
+        }, 0);
+        return () => clearTimeout(t);
+    }, [owned]);
+
+    // Achievement: Pull 100 times
+    useEffect(() => {
+        const t = setTimeout(() => {
+            checkAndUnlock("pull_100", totalPulls >= 100);
+        }, 0);
+        return () => clearTimeout(t);
+    }, [totalPulls]);
+
+    // Achievement: Character collector (20+ unique owned)
+    useEffect(() => {
+        const t = setTimeout(() => {
+            checkAndUnlock("character_collector", owned.length >= 20);
+        }, 0);
+        return () => clearTimeout(t);
+    }, [owned]);
 
     function handleClick() {
         setPoly((p) => p + clickValue);
@@ -99,8 +145,7 @@ export default function App(): JSX.Element {
         await new Promise((res) => setTimeout(res, 700));
 
         const result = rollOne();
-        const prevOwnedCount = owned.length;
-        const { owned: newOwned, polyGainedFromB } = applyPullsToOwned(owned, [result]);
+        const {owned: newOwned, polyGainedFromB} = applyPullsToOwned(owned, [result]);
 
         setOwned(newOwned);
         setPoly((p) => p + polyGainedFromB);
@@ -108,7 +153,6 @@ export default function App(): JSX.Element {
         setPulling(false);
 
         setTotalPulls((p) => p + 1);
-        updateAchievements(prevOwnedCount, newOwned.length, totalPulls + 1);
     }
 
     async function handleTenPull() {
@@ -119,21 +163,18 @@ export default function App(): JSX.Element {
 
         await new Promise((res) => setTimeout(res, 700));
 
-        const { results } = tenPull();
+        const {results} = tenPull();
 
         const sCount = results.filter(
             (r) => r.type === "CHAR" && r.char.rarity === "S"
         ).length;
 
+        // Lucky Day Achievement
         if (sCount >= 2) {
-            setUnlockedAchievements((prev) => {
-                if (prev.includes("lucky_day")) return prev;
-                return [...prev, "lucky_day"];
-            });
+            checkAndUnlock("lucky_day", true);
         }
 
-        const prevOwnedCount = owned.length;
-        const { owned: newOwned, polyGainedFromB } = applyPullsToOwned(owned, results);
+        const {owned: newOwned, polyGainedFromB} = applyPullsToOwned(owned, results);
 
         setOwned(newOwned);
         setPoly((p) => p + polyGainedFromB);
@@ -141,7 +182,6 @@ export default function App(): JSX.Element {
         setPulling(false);
 
         setTotalPulls((p) => p + 10);
-        updateAchievements(prevOwnedCount, newOwned.length, totalPulls + 10);
     }
 
     async function handleStarterBannerPull() {
@@ -154,9 +194,8 @@ export default function App(): JSX.Element {
 
         await new Promise((res) => setTimeout(res, 700));
 
-        const { results } = StarterBanner.tenPull();
-        const prevOwnedCount = owned.length;
-        const { owned: newOwned, polyGainedFromB } = applyPullsToOwned(owned, results);
+        const {results} = StarterBanner.tenPull();
+        const {owned: newOwned, polyGainedFromB} = applyPullsToOwned(owned, results);
 
         setOwned(newOwned);
         setPoly((p) => p + polyGainedFromB);
@@ -165,39 +204,6 @@ export default function App(): JSX.Element {
         setStarterUsed(true); // lock banner after first use
 
         setTotalPulls((p) => p + 10);
-        updateAchievements(prevOwnedCount, newOwned.length, totalPulls + 10);
-
-    }
-
-    function updateAchievements(
-        prevOwnedCount: number,
-        newOwnedCount: number,
-        newTotalPulls: number
-    ) {
-        setUnlockedAchievements((prev) => {
-            const set = new Set(prev);
-            let changed = false;
-
-            // First character
-            if (prevOwnedCount === 0 && newOwnedCount > 0 && !set.has("first_character")) {
-                set.add("first_character");
-                changed = true;
-            }
-
-            // Pull 300 times
-            if (newTotalPulls >= 300 && !set.has("pull_100")) {
-                set.add("pull_100");
-                changed = true;
-            }
-
-            // Character Collector (20+ unique owned)
-            if (newOwnedCount >= 20 && !set.has("character_collector")) {
-                set.add("character_collector");
-                changed = true;
-            }
-
-            return changed ? (Array.from(set) as AchievementId[]) : prev;
-        });
     }
 
     return (
@@ -227,92 +233,92 @@ export default function App(): JSX.Element {
 
                 </div>
 
-            <section className="resource">
-                <div>Polychromes: {Math.floor(poly)}</div>
-                <div>Per Click: {clickValue}</div>
-                <div>CPS: {cps.toFixed(1)}</div>
-            </section>
+                <section className="resource">
+                    <div>Polychromes: {Math.floor(poly)}</div>
+                    <div>Per Click: {clickValue}</div>
+                    <div>CPS: {cps.toFixed(1)}</div>
+                </section>
 
-            <button className="big-click" onClick={handleClick}>
-                Farm Polychromes
-            </button>
-
-            <section className="gacha">
-                <h2>Starter-Pull (One-Time)</h2>
-                <button
-                    onClick={handleStarterBannerPull}
-                    disabled={starterUsed || poly < STARTER_PULL_COST || pulling}
-                >
-                    {starterUsed
-                        ? "Starter Banner Used"
-                        : pulling
-                            ? "Pulling..."
-                            : `Starter 10-Pull (${STARTER_PULL_COST})`}
+                <button className="big-click" onClick={handleClick}>
+                    Farm Polychromes
                 </button>
 
-                <h2>1-Pull</h2>
-                <button onClick={handleOnePull} disabled={poly < ONE_PULL_COST || pulling}>
-                    {pulling ? "Pulling..." : `1-Pull (${ONE_PULL_COST})`}
-                </button>
+                <section className="gacha">
+                    <h2>Starter-Pull (One-Time)</h2>
+                    <button
+                        onClick={handleStarterBannerPull}
+                        disabled={starterUsed || poly < STARTER_PULL_COST || pulling}
+                    >
+                        {starterUsed
+                            ? "Starter Banner Used"
+                            : pulling
+                                ? "Pulling..."
+                                : `Starter 10-Pull (${STARTER_PULL_COST})`}
+                    </button>
 
-                <h2>10-Pull</h2>
-                <button onClick={handleTenPull} disabled={poly < TEN_PULL_COST || pulling}>
-                    {pulling ? "Pulling..." : `10-Pull (${TEN_PULL_COST})`}
-                </button>
+                    <h2>1-Pull</h2>
+                    <button onClick={handleOnePull} disabled={poly < ONE_PULL_COST || pulling}>
+                        {pulling ? "Pulling..." : `1-Pull (${ONE_PULL_COST})`}
+                    </button>
 
-                <PullResults results={lastResults} />
-            </section>
+                    <h2>10-Pull</h2>
+                    <button onClick={handleTenPull} disabled={poly < TEN_PULL_COST || pulling}>
+                        {pulling ? "Pulling..." : `10-Pull (${TEN_PULL_COST})`}
+                    </button>
 
-
-            <section className="owned">
-                <h2>Owned Characters</h2>
-                {owned.length === 0 && <div>No characters.</div>}
-                <div className="owned-list">
-                    {owned.map((o) => (
-                        <CharacterCard key={o.char.id} owned={o} onEquip={undefined} />
-                    ))}
-                </div>
-            </section>
-
-            <section className="team">
-                <h2>Team (3 Slots)</h2>
-                {team.map((slot, idx) => (
-                    <div key={idx} className="team-slot">
-                        <div>Slot {idx + 1}: {slot ? `${slot.char.name} (Lv ${slot.level})` : "-- leer --"}</div>
-
-                        <select
-                            value={slot?.char.id ?? ""}
-                            onChange={(e) => {
-                                const charId = parseInt(e.target.value);
-                                const selectedChar = owned.find(o => o.char.id === charId);
-                                if (!selectedChar) return;
+                    <PullResults results={lastResults}/>
+                </section>
 
 
-                                const isAlreadyEquipped = team.some((t, i) => t?.char.id === charId && i !== idx);
-                                if (isAlreadyEquipped) return;
-
-                                setTeam(t => {
-                                    const copy = [...t];
-                                    copy[idx] = selectedChar;
-                                    return copy;
-                                });
-                            }}
-                        >
-                            <option value="">-- leer --</option>
-                            {owned.map(o => {
-                                const isEquipped = team.some((t, i) => t?.char.id === o.char.id && i !== idx);
-                                return (
-                                    <option key={o.char.id} value={o.char.id} disabled={isEquipped}>
-                                        {o.char.name} (Lv {o.level})
-                                    </option>
-                                );
-                            })}
-                        </select>
+                <section className="owned">
+                    <h2>Owned Characters</h2>
+                    {owned.length === 0 && <div>No characters.</div>}
+                    <div className="owned-list">
+                        {owned.map((o) => (
+                            <CharacterCard key={o.char.id} owned={o} activeFactions={activeFactions}/>
+                        ))}
                     </div>
-                ))}
-            </section>
+                </section>
+
+                <section className="team">
+                    <h2>Team (3 Slots)</h2>
+                    {team.map((slot, idx) => (
+                        <div key={idx} className="team-slot">
+                            <div>Slot {idx + 1}: {slot ? `${slot.char.name} (Lv ${slot.level})` : "-- leer --"}</div>
+
+                            <select
+                                value={slot?.char.id ?? ""}
+                                onChange={(e) => {
+                                    const charId = parseInt(e.target.value);
+                                    const selectedChar = owned.find(o => o.char.id === charId);
+                                    if (!selectedChar) return;
+
+
+                                    const isAlreadyEquipped = team.some((t, i) => t?.char.id === charId && i !== idx);
+                                    if (isAlreadyEquipped) return;
+
+                                    setTeam(t => {
+                                        const copy = [...t];
+                                        copy[idx] = selectedChar;
+                                        return copy;
+                                    });
+                                }}
+                            >
+                                <option value="">-- leer --</option>
+                                {owned.map(o => {
+                                    const isEquipped = team.some((t, i) => t?.char.id === o.char.id && i !== idx);
+                                    return (
+                                        <option key={o.char.id} value={o.char.id} disabled={isEquipped}>
+                                            {o.char.name} (Lv {o.level})
+                                        </option>
+                                    );
+                                })}
+                            </select>
+                        </div>
+                    ))}
+                </section>
                 {showCollection && (
-                    <CollectionModal owned={owned} onClose={closeCollection} />
+                    <CollectionModal owned={owned} onClose={closeCollection}/>
                 )}
 
                 {showAchievements && (

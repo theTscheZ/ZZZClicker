@@ -107,14 +107,6 @@ export default function App(): JSX.Element {
         return () => clearTimeout(t);
     }, [cps]);
 
-    // Achievement: First Character
-    useEffect(() => {
-        const t = setTimeout(() => {
-            checkAndUnlock("first_character", owned.length > 0);
-        }, 0);
-        return () => clearTimeout(t);
-    }, [owned]);
-
     // Achievement: Pull 100 times
     useEffect(() => {
         const t = setTimeout(() => {
@@ -123,9 +115,10 @@ export default function App(): JSX.Element {
         return () => clearTimeout(t);
     }, [totalPulls]);
 
-    // Achievement: Character collector (20+ unique owned)
+    // Achievement: First Character | Character collector (20+ unique owned)
     useEffect(() => {
         const t = setTimeout(() => {
+            checkAndUnlock("first_character", owned.length > 0);
             checkAndUnlock("character_collector", owned.length >= 20);
         }, 0);
         return () => clearTimeout(t);
